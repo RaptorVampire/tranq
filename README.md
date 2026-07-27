@@ -5,6 +5,10 @@
 [![PyPI version](https://badge.fury.io/py/tranq.svg)](https://badge.fury.io/py/tranq)
 [![Python versions](https://img.shields.io/pypi/pyversions/tranq.svg)](https://pypi.org/project/tranq/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+**PyPI:** [https://pypi.org/project/tranq/](https://pypi.org/project/tranq/)  
+**GitHub:** [https://github.com/RaptorVampire/tranq](https://github.com/RaptorVampire/tranq)
 
 ---
 
@@ -333,13 +337,15 @@ Exceptions
 
 Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request on GitHub.
+Contributions are welcome! Please open an issue or submit a pull request.
 
 1. Fork the repository.
 2. Create a feature branch.
 3. Install development dependencies: pip install -e '.[dev]'
 4. Run tests: pytest
 5. Submit a PR.
+
+For details, see CONTRIBUTING.md.
 
 ---
 
