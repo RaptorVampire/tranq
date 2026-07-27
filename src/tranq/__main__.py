@@ -3,7 +3,7 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description="tranq - Calm error handling for Python.")
-    parser.add_argument("--version", action="version", version="tranq 0.2.1")
+    parser.add_argument("--version", action="version", version="tranq 0.2.7")
     parser.parse_args()
     version="tranq 0.2.7"
     print("tranq v0.2.7 - Calm error handling with advanced features.")
