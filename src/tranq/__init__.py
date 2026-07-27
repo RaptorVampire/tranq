@@ -1,10 +1,16 @@
 """tranq - Calm error handling for Python."""
 
-__version__ = "0.2.1"
+__version__ = "0.2.7"
 __author__ = "RaptorVampire <mhman884@gmail.com>"
 
 from .decorators import handle, handle_async
-from .exceptions import TranqError, RetryExhaustedError, CircuitBreakerError, ResultNotAcceptedError
+from .exceptions import (
+    TranqError,
+    RetryExhaustedError,
+    CircuitBreakerError,
+    ResultNotAcceptedError,
+    RetryGroupError,
+)
 from .policies import Policy, set_global_policy, get_global_policy
 from .circuit_breaker import CircuitBreaker
 from .async_circuit_breaker import AsyncCircuitBreaker
@@ -25,6 +31,7 @@ __all__ = [
     "RetryExhaustedError",
     "CircuitBreakerError",
     "ResultNotAcceptedError",
+    "RetryGroupError",
     "Policy",
     "set_global_policy",
     "get_global_policy",

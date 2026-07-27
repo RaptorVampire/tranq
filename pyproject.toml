@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tranq"
-version = "0.2.1"
+version = "0.2.7"
 description = "Modern, decorator-based error handling for Python – calm your code."
 readme = "README.md"
 license = {text = "MIT"}

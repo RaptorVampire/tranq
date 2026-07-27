@@ -3,7 +3,6 @@ import threading
 from .exceptions import CircuitBreakerError
 
 class CircuitBreaker:
-    """Synchronous circuit breaker using threading.Lock and time.monotonic."""
     def __init__(self, failure_threshold: int = 5, timeout: float = 60.0, half_open_requests: int = 1):
         self.failure_threshold = failure_threshold
         self.timeout = timeout
@@ -16,20 +15,19 @@ class CircuitBreaker:
 
     def allow_request(self) -> bool:
         with self._lock:
-            now = time.monotonic()
             if self._state == "closed":
                 return True
-            elif self._state == "open":
-                if now - self._last_failure_time >= self.timeout:
+            if self._state == "open":
+                if time.monotonic() - self._last_failure_time >= self.timeout:
                     self._state = "half-open"
                     self._half_open_allowed = self.half_open_requests
                     return True
                 return False
-            else:  # half-open
-                if self._half_open_allowed > 0:
-                    self._half_open_allowed -= 1
-                    return True
-                return False
+            # half-open
+            if self._half_open_allowed > 0:
+                self._half_open_allowed -= 1
+                return True
+            return False
 
     def record_success(self):
         with self._lock:
