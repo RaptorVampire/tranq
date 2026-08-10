@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tranq"
+version = "0.3.0"
+description = "Calm error handling for Python"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "RaptorVampire", email = "mhman884@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.9"
+dependencies = []
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "black", "isort", "rich"]
+rich = ["rich"]
+
+[project.urls]
+Homepage = "https://github.com/RaptorVampire/tranq"
+"Bug Tracker" = "https://github.com/RaptorVampire/tranq/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
