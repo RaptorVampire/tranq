@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tranq"
+version = "1.0.0"
+description = "Calm, production-grade error handling and resilience for Python"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "RaptorVampire", email = "mhman884@gmail.com"}
+]
+keywords = ["retry", "backoff", "circuit-breaker", "resilience", "error-handling",
+            "rate-limit", "bulkhead", "hedging", "async", "decorator"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+rich = ["rich"]
+sentry = ["sentry-sdk"]
+slack = ["requests"]
+prometheus = ["prometheus-client"]
+dev = ["pytest", "pytest-asyncio>=0.24", "black", "isort", "rich", "build", "twine"]
+all = ["rich", "sentry-sdk", "requests", "prometheus-client"]
+
+[project.urls]
+Homepage = "https://github.com/RaptorVampire/tranq"
+Documentation = "https://tranq.readthedocs.io"
+Repository = "https://github.com/RaptorVampire/tranq"
+"Bug Tracker" = "https://github.com/RaptorVampire/tranq/issues"
+Changelog = "https://github.com/RaptorVampire/tranq/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tranq = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
