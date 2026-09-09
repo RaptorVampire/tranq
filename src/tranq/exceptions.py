@@ -24,10 +24,7 @@ class RetryGroupError(TranqError):
 
 
 class FunctionTimeoutError(TranqError, TimeoutError):
-    """Raised when a wrapped function exceeds its configured timeout.
-
-    Subclasses the builtin TimeoutError so ``on=TimeoutError`` catches it.
-    """
+    """Raised when a wrapped function exceeds its configured timeout."""
     pass
 
 

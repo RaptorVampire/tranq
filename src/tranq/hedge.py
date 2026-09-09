@@ -1,5 +1,7 @@
+"""Hedged requests: first-success, fastest-N, quorum and percentile-based delay."""
 import asyncio
 import functools
+import time
 
 
 async def hedged_call(func, args=(), kwargs=None, *, hedge_delay: float = 0.1,
@@ -55,6 +57,65 @@ async def hedged_call(func, args=(), kwargs=None, *, hedge_delay: float = 0.1,
     if exceptions:
         raise exceptions[-1]
     raise RuntimeError("hedged call produced no result")
+
+
+async def hedged_quorum(func, args=(), kwargs=None, *, quorum: int = 2,
+                        max_attempts: int = 3, timeout: float = None):
+    """Launch attempts and return once ``quorum`` of them succeed.
+
+    Returns a list of the first ``quorum`` successful results.
+    """
+    kwargs = kwargs or {}
+
+    async def _wrap():
+        return await func(*args, **kwargs)
+
+    tasks = [asyncio.create_task(_wrap()) for _ in range(max_attempts)]
+    results = []
+    exceptions = []
+    pending = set(tasks)
+
+    while pending and len(results) < quorum:
+        done, pending = await asyncio.wait(pending, timeout=timeout,
+                                           return_when=asyncio.FIRST_COMPLETED)
+        if not done:
+            break
+        for d in done:
+            exc = d.exception()
+            if exc is None:
+                results.append(d.result())
+            else:
+                exceptions.append(exc)
+
+    for t in pending:
+        t.cancel()
+
+    if len(results) >= quorum:
+        return results[:quorum]
+    if exceptions:
+        raise exceptions[-1]
+    raise RuntimeError("quorum not reached")
+
+
+class PercentileHedgeDelay:
+    """Adaptive hedge delay based on a latency percentile of past calls."""
+
+    def __init__(self, percentile: float = 0.95, window: int = 100):
+        self.percentile = percentile
+        self.window = window
+        self._latencies = []
+
+    def record(self, latency: float):
+        self._latencies.append(latency)
+        if len(self._latencies) > self.window:
+            self._latencies.pop(0)
+
+    def delay(self) -> float:
+        if not self._latencies:
+            return 0.1
+        s = sorted(self._latencies)
+        idx = min(len(s) - 1, int(self.percentile * len(s)))
+        return s[idx]
 
 
 def hedged(hedge_delay: float = 0.1, max_hedges: int = 2):

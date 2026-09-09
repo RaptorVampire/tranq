@@ -1,150 +1,178 @@
 .. tranq documentation master file
 
-🌿 tranq
-========
+🌿 tranq — Resilience Platform for Python
+==========================================
 
-**Calm, production-grade error handling & resilience for Python.**
+.. raw:: html
 
-.. image:: https://img.shields.io/badge/PyPI-tranq-blue?style=flat-square
-   :target: https://pypi.org/project/tranq/
-.. image:: https://img.shields.io/badge/python-3.9%2B-green?style=flat-square
-.. image:: https://img.shields.io/badge/tests-135%2B%20passing-brightgreen?style=flat-square
-.. image:: https://img.shields.io/badge/license-MIT-orange?style=flat-square
+   <p align="center">
+     <img src="https://img.shields.io/pypi/v/tranq?style=for-the-badge&color=blue" alt="PyPI">
+     <img src="https://img.shields.io/pypi/pyversions/tranq?style=for-the-badge&color=green" alt="Python">
+     <img src="https://img.shields.io/badge/license-MIT-orange?style=for-the-badge" alt="MIT">
+     <img src="https://img.shields.io/badge/status-Production%2FStable-success?style=for-the-badge" alt="Status">
+   </p>
 
-Installation
-------------
-
-.. code-block:: bash
-
-   pip install tranq
-   pip install tranq[all]      # optional integrations
-
-Quick Start
------------
+**tranq** is a **production-grade resilience platform** for Python that brings
+together the best ideas from ``tenacity``, ``backoff``, ``pyresilience``,
+``resilience4j`` and modern microservice patterns — in a single, zero-boilerplate,
+decorator-based API.
 
 .. code-block:: python
 
    import tranq
 
-   @tranq.handle(on=ConnectionError, retry=3, delay=0.5, timeout=5.0)
-   def fetch():
+   @tranq.handle(
+       on=ConnectionError,
+       retry=4,
+       delay=1.0,
+       backoff=2.0,
+       timeout=5.0,
+       circuit_breaker=tranq.SlidingWindowCircuitBreaker(failure_rate_threshold=0.5),
+   )
+   def call_external_service():
        ...
 
-   @tranq.handle_async(on=TimeoutError, retry=2, fallback=lambda: "offline")
-   async def fetch_async():
-       ...
+Why tranq?
+----------
 
-Resilience Features (v1.0.0)
-----------------------------
+Writing repetitive ``try``/``except`` blocks clutters your code and buries
+the business logic. Retry loops, circuit breakers, rate limits, timeouts and
+cache stampede prevention are **cross-cutting concerns** that should not
+pollute your core logic.
 
-* **Retry + backoff** (exponential / linear / fibonacci / custom, jitter, max_delay)
-* **Timeouts** via ``timeout=`` (raises ``FunctionTimeoutError``)
-* **Event hooks**: ``on_retry``, ``on_success``, ``on_failure``, ``on_complete``
-* **Circuit breakers**: count-based and sliding-window (failure-rate), sync & async
-* **Rate limiter**: ``@tranq.rate_limit`` (token bucket)
-* **Bulkhead**: ``@tranq.bulkhead`` (concurrency isolation)
-* **Retry budget**: ``tranq.RetryBudget``
-* **Hedged requests**: ``tranq.hedged`` / ``tranq.hedged_call``
-* **Context managers**: ``tranq.retry`` and ``async with tranq.retry_async``
-* **Retry groups**: ``tranq.retry_group`` / ``tranq.async_retry_group``
-* **Metrics**: counts, error-rate and p50/p95/p99 latencies
-* **Statistics**: ``summary_table``, ``overall_health``, ``render_report``
-* **Reporters**: File, Log, Sentry, Slack, Prometheus
-* **Mock errors**, **dependency injection**, **global policy**, **stateful retry**
+**tranq** gives you **declarative error handling** through decorators, context
+managers, and a composable policy DSL — so you focus on **what** your code does,
+not **how** it recovers from failure.
 
-Example: sliding-window circuit breaker
----------------------------------------
+.. grid:: 1 1 2 3
+   :gutter: 3
 
-.. code-block:: python
+   .. grid-item-card:: 🔁 Smart Retries
+      :link: features/retry
+      :link-type: doc
 
-   swc = tranq.SlidingWindowCircuitBreaker(
-       window_size=100, failure_rate_threshold=0.5, minimum_calls=10)
+      Exponential, linear, Fibonacci, full/equal/decorrelated jitter,
+      composable stop conditions, HTTP intelligence.
 
-   @tranq.handle(on=Exception, circuit_breaker=swc)
-   def call_service():
-       ...
+   .. grid-item-card:: 🚦 Circuit Breakers
+      :link: features/circuit_breaker
+      :link-type: doc
 
-Example: async context manager
-------------------------------
+      Count-based, sliding-window, slow-call detection, event emission,
+      per-service registry.
 
-.. code-block:: python
+   .. grid-item-card:: 🚦 Rate Limiting
+      :link: features/rate_limiter
+      :link-type: doc
 
-   async with tranq.retry_async(on=ConnectionError, retry=3) as ctx:
-       result = await ctx.run(my_async_func, arg)
+      Token bucket, leaky bucket, fixed/sliding window, adaptive,
+      distributed (Redis).
 
-API Reference
--------------
+   .. grid-item-card:: 🚪 Bulkheads
+      :link: features/bulkhead
+      :link-type: doc
 
-Decorators
-~~~~~~~~~~
+      Thread, async, queue-based, per-key isolation to prevent cascading
+      resource exhaustion.
 
-.. py:function:: tranq.handle(...)
-.. py:function:: tranq.handle_async(...)
-.. py:function:: tranq.rate_limit(rate, per=1.0, burst=None, timeout=None, raise_on_limit=True)
-.. py:function:: tranq.bulkhead(max_concurrent, timeout=None, raise_on_full=True)
-.. py:function:: tranq.hedged(hedge_delay=0.1, max_hedges=2)
-.. py:function:: tranq.profile(func)
-.. py:function:: tranq.async_profile(func)
+   .. grid-item-card:: 🗄️ Resilience Cache
+      :link: features/cache
+      :link-type: doc
 
-Context managers
-~~~~~~~~~~~~~~~~
+      TTL, LRU, single-flight stampede prevention, stale-if-error,
+      negative caching.
 
-.. py:function:: tranq.retry(...)
-.. py:function:: tranq.retry_async(...)
+   .. grid-item-card:: 🧩 Policy Builder
+      :link: features/composition
+      :link-type: doc
 
-Circuit breakers
-~~~~~~~~~~~~~~~~
+      Fluent DSL combining all features into a single decorator.
 
-.. py:class:: tranq.CircuitBreaker(failure_threshold=5, timeout=60.0, half_open_requests=1)
-.. py:class:: tranq.AsyncCircuitBreaker(...)
-.. py:class:: tranq.SlidingWindowCircuitBreaker(window_size=100, failure_rate_threshold=0.5, timeout=60.0, half_open_requests=1, minimum_calls=10)
-.. py:class:: tranq.AsyncSlidingWindowCircuitBreaker(...)
+   .. grid-item-card:: 🧠 Adaptive Resilience
+      :link: features/adaptive
+      :link-type: doc
 
-Resilience primitives
-~~~~~~~~~~~~~~~~~~~~~
+      Automatically tunes timeout, retry and rate limits from observed
+      latency and error rate.
 
-.. py:class:: tranq.RateLimiter(rate, per=1.0, burst=None)
-.. py:class:: tranq.Bulkhead(max_concurrent, timeout=None)
-.. py:class:: tranq.AsyncBulkhead(max_concurrent, timeout=None)
-.. py:class:: tranq.RetryBudget(ttl=60.0, ratio=0.2, min_tokens=10)
-.. py:function:: tranq.hedged_call(func, args=(), kwargs=None, hedge_delay=0.1, max_hedges=2)
+   .. grid-item-card:: 🔭 OpenTelemetry Native
+      :link: features/telemetry
+      :link-type: doc
 
-Metrics & statistics
-~~~~~~~~~~~~~~~~~~~~
+      Automatic spans, counters and events for every resilience operation.
 
-.. py:function:: tranq.get_metrics(include_durations=False)
-.. py:function:: tranq.reset_metrics()
-.. py:function:: tranq.summary_table(metrics=None)
-.. py:function:: tranq.overall_health(metrics=None)
-.. py:function:: tranq.render_report(metrics=None)
-.. py:function:: tranq.get_profile(name=None)
+   .. grid-item-card:: 🤖 LLM Resilience
+      :link: features/llm
+      :link-type: doc
 
-Policies
-~~~~~~~~
+      Rate limits, Retry-After, provider failover, token budgets.
 
-.. py:class:: tranq.Policy
-.. py:function:: tranq.set_global_policy(policy)
-.. py:function:: tranq.get_global_policy()
 
-Exceptions
-~~~~~~~~~~
+Design Principles
+-----------------
 
-.. py:exception:: tranq.TranqError
-.. py:exception:: tranq.RetryExhaustedError
-.. py:exception:: tranq.CircuitBreakerError
-.. py:exception:: tranq.ResultNotAcceptedError
-.. py:exception:: tranq.RetryGroupError
-.. py:exception:: tranq.FunctionTimeoutError
-.. py:exception:: tranq.RateLimitExceeded
-.. py:exception:: tranq.BulkheadFullError
-.. py:exception:: tranq.RetryBudgetExhaustedError
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Principle
+     - Description
+   * - 🧘 **Tranquil**
+     - Clean, readable, zero-boilerplate. Decorators over try/except.
+   * - 🔌 **Non-invasive**
+     - No code changes inside your functions required.
+   * - 🧩 **Composable**
+     - Every feature combines: retry + CB + timeout + cache + metrics + hooks.
+   * - 🏭 **Production-ready**
+     - Thread-safe, async-safe, contextvar-isolated. 190+ tests.
+   * - 📦 **Zero dependencies**
+     - Core has no runtime deps. Optional extras for Sentry, Slack, Prometheus, Redis, OpenTelemetry.
+   * - 🔍 **Observable**
+     - Built-in metrics, profiling, percentiles, health reports, OpenTelemetry.
+
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Getting Started
    :hidden:
 
-   self
+   installation
+   quickstart
+   design
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Features
+   :hidden:
+
+   features/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference
+   :hidden:
+
+   api/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Guides
+   :hidden:
+
+   examples
+   testing
+   best_practices
+   comparison
+   migration
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Project
+   :hidden:
+
+   changelog
+   contributing
+
 
 Indices and tables
 ==================
