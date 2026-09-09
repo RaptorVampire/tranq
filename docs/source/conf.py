@@ -52,11 +52,10 @@ napoleon_numpy_docstring = False
 napoleon_include_init_with_doc = True
 
 # -- Intersphinx -------------------------------------------------------------
+# -- Intersphinx -------------------------------------------------------------
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "asyncio": ("https://docs.python.org/3", None),
 }
-
 # -- Options for HTML output -------------------------------------------------
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
